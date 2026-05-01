@@ -1,4 +1,6 @@
 *.exe
+*.o
+vbm
 *.png
 main
 *.out
