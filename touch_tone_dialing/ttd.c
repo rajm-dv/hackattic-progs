@@ -9,6 +9,8 @@ typedef struct memory {
   size_t size;
 } memory_t;
 
+
+// Function to store http response
 size_t write_to_buffer(void *contents, size_t size, size_t nmemb, void *userp) {
   size_t rsize = size * nmemb;
   memory_t *mem = userp;
@@ -22,6 +24,7 @@ size_t write_to_buffer(void *contents, size_t size, size_t nmemb, void *userp) {
   return rsize;
 }
 
+// Function to write http reponse into file
 size_t write_to_file(void *contents, size_t size, size_t nmemb, void *stream) {
   return fwrite(contents, size, nmemb, (FILE *)stream);
 }
@@ -40,6 +43,7 @@ int main() {
     return 1;
   }
 
+  // Set all global options
   if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     return 1;
   }
@@ -56,17 +60,19 @@ int main() {
   /* Get the wav file url */
   memory_t response = {0};
 
+  // Set curl request options
   curl_easy_setopt(curl, CURLOPT_URL, url);
   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_to_buffer);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
 
+  // Perform the curl request
   if (curl_easy_perform(curl) != CURLE_OK) {
     printf("Curl request failed.\n");
     return 1;
   }
 
-  /* Extract the wav file */
+  // Extract the .wav file url from response json
   root = cJSON_Parse(response.data);
   cJSON *wav = cJSON_GetObjectItemCaseSensitive(root, "wav_url");
   wav_url = strdup(wav->valuestring);
@@ -78,7 +84,7 @@ int main() {
   free(response.data);
   response.data = NULL;
 
-  /* Writing the wav file */
+  // Write the .wav file
   fp = fopen("tone.wav", "wb");
 
   curl_easy_setopt(curl, CURLOPT_URL, wav_url);
@@ -92,6 +98,8 @@ int main() {
 
   fclose(fp);
   fp = NULL;
+
+  // Analize frequencies using FFT
 
   return 0;
 }
