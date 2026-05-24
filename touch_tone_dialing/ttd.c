@@ -9,7 +9,6 @@ typedef struct memory {
   size_t size;
 } memory_t;
 
-
 // Function to store http response
 size_t write_to_buffer(void *contents, size_t size, size_t nmemb, void *userp) {
   size_t rsize = size * nmemb;
@@ -99,7 +98,54 @@ int main() {
   fclose(fp);
   fp = NULL;
 
-  // Analize frequencies using FFT
+  // Getting the dialed keys
+  fp = popen("dtmf2num -o tone.wav", "r");
+  if (!fp) {
+    perror("popen");
+    return 1;
+  }
+
+  // store the keys
+  char line[512];
+  char sequence[128];
+
+  while (fgets(line, sizeof(line), fp)) {
+    fputs(line, stdout);
+    if (sscanf(line, "- DTMF numbers:  %127s", sequence) == 1) {
+      break;
+    }
+  }
+
+  pclose(fp);
+
+  // printf("%s\n", dedtmf);
+  
+  // Submit solution
+  memory_t post_response = {0};
+  
+  char solution_url[512];
+  snprintf(solution_url, sizeof(solution_url), "%s/solve?access_token=%s", base, token);
+
+  root = cJSON_CreateObject();
+  cJSON_AddStringToObject(root, "sequence", sequence);
+  char *json_data = cJSON_Print(root);
+
+  printf("%s\n", json_data);
+
+  curl_easy_setopt(curl, CURLOPT_URL, solution_url);
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_data);
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(json_data));
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_to_buffer);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &post_response);
+
+  if(curl_easy_perform(curl) != CURLE_OK) {
+    printf("Post request failed\n");
+    return 1;
+  }
+
+  printf("Hackattic response: %s", post_response.data);
+  free(post_response.data);
+  post_response.data = NULL;
 
   return 0;
 }
