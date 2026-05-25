@@ -111,15 +111,13 @@ int main() {
 
   while (fgets(line, sizeof(line), fp)) {
     fputs(line, stdout);
-    if (sscanf(line, "- DTMF numbers:  %127s", sequence) == 1) {
+    if (sscanf(line, "- DTMF numbers:  %s", sequence) == 1) {
       break;
     }
   }
 
   pclose(fp);
 
-  // printf("%s\n", dedtmf);
-  
   // Submit solution
   memory_t post_response = {0};
   
