@@ -1,5 +1,2 @@
 ttd: ttd.c
-	gcc -Wall -g -o ttd ttd.c -lcurl -lcjson
-
-clean:
-	rm -f ttd
+	gcc -Wall -Wextra -Werror -o ttd ttd.c -lcurl -lcjson

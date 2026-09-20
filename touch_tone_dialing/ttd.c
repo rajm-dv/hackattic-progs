@@ -98,33 +98,6 @@ int main() {
   fclose(fp);
   fp = NULL;
 
-  // Getting the dialed keys
-  fp = popen("multimon-ng -t wav -a DTMF tone.wav", "r");
-  if (!fp) {
-    perror("popen");
-    return 1;
-  }
-
-  // store the keys
-  char line[128];
-  char key;
-  char sequence[512];
-
-  int index = 0;
-  while (fgets(line, sizeof(line), fp)) {
-    fputs(line, stdout);
-    if (sscanf(line, "DTMF:  %c", &key) == 1) {
-      sequence[index] = key;
-      index++;
-    }
-  }
-  
-  sequence[index] = '\0';
-
-  // printf("DTMF decoded: %s\n", sequence);
-
-  pclose(fp);
-
   // Submit solution
   memory_t post_response = {0};
   
